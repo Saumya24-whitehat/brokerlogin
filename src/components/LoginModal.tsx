@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -38,21 +39,34 @@ const LoginModal = ({ isOpen, onClose, brokerName, brokerLogo, onLoginSuccess }:
 
     setIsLoading(true);
 
-    // Simulate API call for login verification
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Mock verification - in real app, this would call the broker's API
-    if (loginId.toLowerCase() === "demo" && password === "demo123") {
-      setIsLoading(false);
-      toast({
-        title: "Login Successful!",
-        description: `Connected to ${brokerName} successfully.`,
+    try {
+      // Call Samco login edge function
+      const { data, error } = await supabase.functions.invoke('samco-login', {
+        body: { userId: loginId, password: password }
       });
-      onLoginSuccess();
-      handleClose();
-    } else {
+
+      if (error) {
+        console.error('Edge function error:', error);
+        setError("Connection error. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.success) {
+        toast({
+          title: "Login Successful!",
+          description: `Connected to ${brokerName} as ${data.accountName || loginId}.`,
+        });
+        onLoginSuccess();
+        handleClose();
+      } else {
+        setError(data.error || "Invalid Login ID or Password. Please try again.");
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError("An error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
-      setError("Invalid Login ID or Password. Please try again.");
     }
   };
 
