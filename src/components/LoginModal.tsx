@@ -13,7 +13,7 @@ interface LoginModalProps {
   brokerId: string;
   brokerName: string;
   brokerLogo: string;
-  onLoginSuccess: (userName?: string) => void;
+  onLoginSuccess: (userName?: string, accountName?: string) => void;
 }
 
 const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLoginSuccess }: LoginModalProps) => {
@@ -83,7 +83,7 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
           title: "Login Successful!",
           description: `Connected to ${brokerName} as ${data.accountName || loginId}.`,
         });
-        onLoginSuccess(loginId); // Pass the username for session monitoring
+        onLoginSuccess(loginId, data.accountName || loginId); // Pass username and accountName
         handleClose();
       } else {
         setError(data.error || "Invalid credentials. Please try again.");

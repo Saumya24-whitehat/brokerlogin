@@ -1,8 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Shield, TrendingUp, Zap } from "lucide-react";
 import BrokerCard from "@/components/BrokerCard";
 import LoginModal from "@/components/LoginModal";
 import { useSessionMonitor } from "@/hooks/useSessionMonitor";
+import { supabase } from "@/integrations/supabase/client";
 import samcoLogo from "@/assets/samco-logo.svg";
 import angeloneLogo from "@/assets/angelone-logo.svg";
 
@@ -32,10 +33,56 @@ const Index = () => {
   const [selectedBroker, setSelectedBroker] = useState<Broker | null>(null);
   const [connectedBrokers, setConnectedBrokers] = useState<string[]>([]);
   const [brokerUserNames, setBrokerUserNames] = useState<Record<string, string>>({});
+  const [brokerAccountNames, setBrokerAccountNames] = useState<Record<string, string>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(true);
+
+  // Load existing sessions from database on mount
+  useEffect(() => {
+    const loadExistingSessions = async () => {
+      try {
+        const { data: sessions, error } = await supabase
+          .from('broker_sessions')
+          .select('user_name, broker_name, account_name, session_status')
+          .eq('session_status', 'active');
+
+        if (error) {
+          console.error('Error loading sessions:', error);
+          setIsLoadingSessions(false);
+          return;
+        }
+
+        if (sessions && sessions.length > 0) {
+          const connected: string[] = [];
+          const userNames: Record<string, string> = {};
+          const accountNames: Record<string, string> = {};
+
+          sessions.forEach((session) => {
+            // Map broker_name from DB to our broker IDs
+            const brokerId = session.broker_name === 'semco' ? 'samco' : session.broker_name;
+            connected.push(brokerId);
+            userNames[brokerId] = session.user_name;
+            if (session.account_name) {
+              accountNames[brokerId] = session.account_name;
+            }
+          });
+
+          setConnectedBrokers(connected);
+          setBrokerUserNames(userNames);
+          setBrokerAccountNames(accountNames);
+          console.log('Loaded existing sessions:', connected);
+        }
+      } catch (error) {
+        console.error('Error loading sessions:', error);
+      } finally {
+        setIsLoadingSessions(false);
+      }
+    };
+
+    loadExistingSessions();
+  }, []);
 
   const handleSessionExpired = useCallback((brokerId: string) => {
-    // Could show a modal or notification here
     console.log(`Session expired for ${brokerId}`);
   }, []);
 
@@ -56,13 +103,16 @@ const Index = () => {
     setIsModalOpen(true);
   };
 
-  const handleLoginSuccess = (userName?: string) => {
+  const handleLoginSuccess = (userName?: string, accountName?: string) => {
     if (selectedBroker) {
       if (!connectedBrokers.includes(selectedBroker.id)) {
         setConnectedBrokers([...connectedBrokers, selectedBroker.id]);
       }
       if (userName) {
         setBrokerUserNames(prev => ({ ...prev, [selectedBroker.id]: userName }));
+      }
+      if (accountName) {
+        setBrokerAccountNames(prev => ({ ...prev, [selectedBroker.id]: accountName }));
       }
     }
   };
@@ -147,6 +197,7 @@ const Index = () => {
                 lastCheckTime={sessionStatuses[broker.id]?.lastCheckTime}
                 sessionActive={sessionStatuses[broker.id]?.sessionActive ?? true}
                 isChecking={sessionStatuses[broker.id]?.isChecking}
+                accountName={brokerAccountNames[broker.id]}
               />
             ))}
             
