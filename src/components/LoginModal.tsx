@@ -181,12 +181,11 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
                 <Input
                   id="totpToken"
                   type="text"
-                  placeholder="Enter 6-digit TOTP from your authenticator"
+                  placeholder="Enter your TOTP secret key"
                   value={totpToken}
                   onChange={(e) => setTotpToken(e.target.value)}
                   disabled={isLoading}
                   className="h-11"
-                  maxLength={6}
                 />
               </div>
 
