@@ -3,7 +3,7 @@ import { Shield, TrendingUp, Zap } from "lucide-react";
 import BrokerCard from "@/components/BrokerCard";
 import LoginModal from "@/components/LoginModal";
 import samcoLogo from "@/assets/samco-logo.svg";
-import angeloneLogo from "@/assets/angelone-logo.png";
+import angeloneLogo from "@/assets/angelone-logo.svg";
 
 interface Broker {
   id: string;
