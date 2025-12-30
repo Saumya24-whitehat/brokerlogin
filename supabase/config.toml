@@ -1,1 +1,4 @@
 project_id = "yeomhnubmghjvdjpbiym"
+
+[functions.samco-login]
+verify_jwt = false

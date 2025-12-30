@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      broker_sessions: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          broker_name: string
+          created_at: string
+          exchange_list: string[] | null
+          id: string
+          login_time: string
+          order_type_list: string[] | null
+          product_list: string[] | null
+          server_time: string | null
+          session_token: string
+          updated_at: string
+          user_name: string
+        }
+        Insert: {
+          account_id?: string | null
+          account_name?: string | null
+          broker_name?: string
+          created_at?: string
+          exchange_list?: string[] | null
+          id?: string
+          login_time?: string
+          order_type_list?: string[] | null
+          product_list?: string[] | null
+          server_time?: string | null
+          session_token: string
+          updated_at?: string
+          user_name: string
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string | null
+          broker_name?: string
+          created_at?: string
+          exchange_list?: string[] | null
+          id?: string
+          login_time?: string
+          order_type_list?: string[] | null
+          product_list?: string[] | null
+          server_time?: string | null
+          session_token?: string
+          updated_at?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
