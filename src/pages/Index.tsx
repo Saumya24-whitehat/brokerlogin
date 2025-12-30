@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Shield, TrendingUp, Zap } from "lucide-react";
 import BrokerCard from "@/components/BrokerCard";
 import LoginModal from "@/components/LoginModal";
-import semcoLogo from "@/assets/semco-logo.png";
+import samcoLogo from "@/assets/samco-logo.svg";
+import angeloneLogo from "@/assets/angelone-logo.png";
 
 interface Broker {
   id: string;
@@ -13,10 +14,16 @@ interface Broker {
 
 const brokers: Broker[] = [
   {
-    id: "semco",
-    name: "Semco",
-    logo: semcoLogo,
-    description: "Connect your Semco trading account",
+    id: "samco",
+    name: "Samco",
+    logo: samcoLogo,
+    description: "Connect your Samco trading account",
+  },
+  {
+    id: "angelone",
+    name: "Angel One",
+    logo: angeloneLogo,
+    description: "Connect your Angel One trading account",
   },
 ];
 
@@ -172,6 +179,7 @@ const Index = () => {
         <LoginModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          brokerId={selectedBroker.id}
           brokerName={selectedBroker.name}
           brokerLogo={selectedBroker.logo}
           onLoginSuccess={handleLoginSuccess}

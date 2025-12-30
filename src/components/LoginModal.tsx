@@ -10,18 +10,23 @@ import { supabase } from "@/integrations/supabase/client";
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  brokerId: string;
   brokerName: string;
   brokerLogo: string;
   onLoginSuccess: () => void;
 }
 
-const LoginModal = ({ isOpen, onClose, brokerName, brokerLogo, onLoginSuccess }: LoginModalProps) => {
+const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLoginSuccess }: LoginModalProps) => {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
+  const [totpToken, setTotpToken] = useState("");
+  const [apiKey, setApiKey] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { toast } = useToast();
+
+  const isAngelOne = brokerId === "angelone";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,21 +34,42 @@ const LoginModal = ({ isOpen, onClose, brokerName, brokerLogo, onLoginSuccess }:
 
     // Validation
     if (!loginId.trim()) {
-      setError("Please enter your Login ID");
+      setError(isAngelOne ? "Please enter your Client Code" : "Please enter your Login ID");
       return;
     }
     if (!password.trim()) {
       setError("Please enter your Password");
       return;
     }
+    if (isAngelOne && !totpToken.trim()) {
+      setError("Please enter your TOTP Token");
+      return;
+    }
+    if (isAngelOne && !apiKey.trim()) {
+      setError("Please enter your API Key");
+      return;
+    }
 
     setIsLoading(true);
 
     try {
-      // Call Samco login edge function
-      const { data, error } = await supabase.functions.invoke('samco-login', {
-        body: { userId: loginId, password: password }
-      });
+      let data, error;
+
+      if (isAngelOne) {
+        // Call Angel One login edge function
+        const response = await supabase.functions.invoke('angelone-login', {
+          body: { clientCode: loginId, password: password, totpToken: totpToken, apiKey: apiKey }
+        });
+        data = response.data;
+        error = response.error;
+      } else {
+        // Call Samco login edge function
+        const response = await supabase.functions.invoke('samco-login', {
+          body: { userId: loginId, password: password }
+        });
+        data = response.data;
+        error = response.error;
+      }
 
       if (error) {
         console.error('Edge function error:', error);
@@ -60,7 +86,7 @@ const LoginModal = ({ isOpen, onClose, brokerName, brokerLogo, onLoginSuccess }:
         onLoginSuccess();
         handleClose();
       } else {
-        setError(data.error || "Invalid Login ID or Password. Please try again.");
+        setError(data.error || "Invalid credentials. Please try again.");
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -73,6 +99,8 @@ const LoginModal = ({ isOpen, onClose, brokerName, brokerLogo, onLoginSuccess }:
   const handleClose = () => {
     setLoginId("");
     setPassword("");
+    setTotpToken("");
+    setApiKey("");
     setError("");
     setShowPassword(false);
     onClose();
@@ -97,7 +125,7 @@ const LoginModal = ({ isOpen, onClose, brokerName, brokerLogo, onLoginSuccess }:
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm animate-fade-in">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -107,16 +135,16 @@ const LoginModal = ({ isOpen, onClose, brokerName, brokerLogo, onLoginSuccess }:
 
           <div className="space-y-2">
             <Label htmlFor="loginId" className="text-foreground font-medium">
-              Login ID
+              {isAngelOne ? "Client Code" : "Login ID"}
             </Label>
             <Input
               id="loginId"
               type="text"
-              placeholder="Enter your Login ID"
+              placeholder={isAngelOne ? "Enter your Client Code" : "Enter your Login ID"}
               value={loginId}
               onChange={(e) => setLoginId(e.target.value)}
               disabled={isLoading}
-              className="h-12"
+              className="h-11"
             />
           </div>
 
@@ -132,7 +160,7 @@ const LoginModal = ({ isOpen, onClose, brokerName, brokerLogo, onLoginSuccess }:
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                className="h-12 pr-12"
+                className="h-11 pr-12"
               />
               <button
                 type="button"
@@ -144,11 +172,46 @@ const LoginModal = ({ isOpen, onClose, brokerName, brokerLogo, onLoginSuccess }:
             </div>
           </div>
 
+          {isAngelOne && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="totpToken" className="text-foreground font-medium">
+                  TOTP Token
+                </Label>
+                <Input
+                  id="totpToken"
+                  type="text"
+                  placeholder="Enter 6-digit TOTP from your authenticator"
+                  value={totpToken}
+                  onChange={(e) => setTotpToken(e.target.value)}
+                  disabled={isLoading}
+                  className="h-11"
+                  maxLength={6}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="apiKey" className="text-foreground font-medium">
+                  API Key
+                </Label>
+                <Input
+                  id="apiKey"
+                  type="text"
+                  placeholder="Enter your Angel One API Key"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  disabled={isLoading}
+                  className="h-11"
+                />
+              </div>
+            </>
+          )}
+
           <Button
             type="submit"
             variant="glow"
             size="lg"
-            className="w-full"
+            className="w-full mt-2"
             disabled={isLoading}
           >
             {isLoading ? (
