@@ -6,6 +6,7 @@ import { useSessionMonitor } from "@/hooks/useSessionMonitor";
 import { supabase } from "@/integrations/supabase/client";
 import samcoLogo from "@/assets/samco-logo.svg";
 import angeloneLogo from "@/assets/angelone-logo.svg";
+import shoonyaLogo from "@/assets/shoonya-logo.png";
 
 interface Broker {
   id: string;
@@ -26,6 +27,12 @@ const brokers: Broker[] = [
     name: "Angel One",
     logo: angeloneLogo,
     description: "Connect your Angel One trading account",
+  },
+  {
+    id: "shoonya",
+    name: "Shoonya",
+    logo: shoonyaLogo,
+    description: "Connect your Shoonya/Finvasia account",
   },
 ];
 

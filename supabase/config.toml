@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.angelone-check-session]
 verify_jwt = false
+
+[functions.shoonya-login]
+verify_jwt = false
+
+[functions.shoonya-check-session]
+verify_jwt = false

@@ -80,7 +80,14 @@ export const useSessionMonitor = ({
     }));
 
     try {
-      const functionName = brokerId === 'angelone' ? 'angelone-check-session' : 'samco-check-session';
+      let functionName: string;
+      if (brokerId === 'angelone') {
+        functionName = 'angelone-check-session';
+      } else if (brokerId === 'shoonya') {
+        functionName = 'shoonya-check-session';
+      } else {
+        functionName = 'samco-check-session';
+      }
       
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: { userName }
@@ -103,8 +110,9 @@ export const useSessionMonitor = ({
           }
         }));
 
-        if (data.reloggedIn) {
-          toast.success(`${brokerId === 'angelone' ? 'Angel One' : 'Samco'} session auto-restored!`);
+        if (data.reloggedIn || data.reLoginPerformed) {
+          const brokerDisplayName = brokerId === 'angelone' ? 'Angel One' : brokerId === 'shoonya' ? 'Shoonya' : 'Samco';
+          toast.success(`${brokerDisplayName} session auto-restored!`);
           onSessionRestored?.(brokerId);
         }
       } else {
@@ -120,7 +128,8 @@ export const useSessionMonitor = ({
           }
         }));
 
-        toast.error(`${brokerId === 'angelone' ? 'Angel One' : 'Samco'} session expired! Please re-login.`);
+        const brokerDisplayName = brokerId === 'angelone' ? 'Angel One' : brokerId === 'shoonya' ? 'Shoonya' : 'Samco';
+        toast.error(`${brokerDisplayName} session expired! Please re-login.`);
         onSessionExpired?.(brokerId);
       }
     } catch (error) {

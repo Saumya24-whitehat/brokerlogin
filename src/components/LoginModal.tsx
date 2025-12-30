@@ -21,12 +21,14 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
   const [password, setPassword] = useState("");
   const [totpToken, setTotpToken] = useState("");
   const [apiKey, setApiKey] = useState("");
+  const [vendorCode, setVendorCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { toast } = useToast();
 
   const isAngelOne = brokerId === "angelone";
+  const isShoonya = brokerId === "shoonya";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,19 +36,23 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
 
     // Validation
     if (!loginId.trim()) {
-      setError(isAngelOne ? "Please enter your Client Code" : "Please enter your Login ID");
+      setError(isAngelOne ? "Please enter your Client Code" : isShoonya ? "Please enter your User ID" : "Please enter your Login ID");
       return;
     }
     if (!password.trim()) {
       setError("Please enter your Password");
       return;
     }
-    if (isAngelOne && !totpToken.trim()) {
+    if ((isAngelOne || isShoonya) && !totpToken.trim()) {
       setError("Please enter your TOTP Token");
       return;
     }
-    if (isAngelOne && !apiKey.trim()) {
+    if ((isAngelOne || isShoonya) && !apiKey.trim()) {
       setError("Please enter your API Key");
+      return;
+    }
+    if (isShoonya && !vendorCode.trim()) {
+      setError("Please enter your Vendor Code");
       return;
     }
 
@@ -59,6 +65,13 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
         // Call Angel One login edge function
         const response = await supabase.functions.invoke('angelone-login', {
           body: { clientCode: loginId, password: password, totpToken: totpToken, apiKey: apiKey }
+        });
+        data = response.data;
+        error = response.error;
+      } else if (isShoonya) {
+        // Call Shoonya login edge function
+        const response = await supabase.functions.invoke('shoonya-login', {
+          body: { userId: loginId, password: password, totpToken: totpToken, vendorCode: vendorCode, apiKey: apiKey }
         });
         data = response.data;
         error = response.error;
@@ -101,6 +114,7 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
     setPassword("");
     setTotpToken("");
     setApiKey("");
+    setVendorCode("");
     setError("");
     setShowPassword(false);
     onClose();
@@ -135,12 +149,12 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
 
           <div className="space-y-2">
             <Label htmlFor="loginId" className="text-foreground font-medium">
-              {isAngelOne ? "Client Code" : "Login ID"}
+              {isAngelOne ? "Client Code" : isShoonya ? "User ID" : "Login ID"}
             </Label>
             <Input
               id="loginId"
               type="text"
-              placeholder={isAngelOne ? "Enter your Client Code" : "Enter your Login ID"}
+              placeholder={isAngelOne ? "Enter your Client Code" : isShoonya ? "Enter your User ID" : "Enter your Login ID"}
               value={loginId}
               onChange={(e) => setLoginId(e.target.value)}
               disabled={isLoading}
@@ -172,7 +186,7 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
             </div>
           </div>
 
-          {isAngelOne && (
+          {(isAngelOne || isShoonya) && (
             <>
               <div className="space-y-2">
                 <Label htmlFor="totpToken" className="text-foreground font-medium">
@@ -189,6 +203,23 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
                 />
               </div>
 
+              {isShoonya && (
+                <div className="space-y-2">
+                  <Label htmlFor="vendorCode" className="text-foreground font-medium">
+                    Vendor Code
+                  </Label>
+                  <Input
+                    id="vendorCode"
+                    type="text"
+                    placeholder="Enter your Vendor Code"
+                    value={vendorCode}
+                    onChange={(e) => setVendorCode(e.target.value)}
+                    disabled={isLoading}
+                    className="h-11"
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="apiKey" className="text-foreground font-medium">
                   API Key
@@ -196,7 +227,7 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
                 <Input
                   id="apiKey"
                   type="text"
-                  placeholder="Enter your Angel One API Key"
+                  placeholder={isAngelOne ? "Enter your Angel One API Key" : "Enter your Shoonya API Key"}
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   disabled={isLoading}
