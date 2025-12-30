@@ -82,32 +82,63 @@ serve(async (req) => {
       const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
       const supabase = createClient(supabaseUrl, supabaseKey);
 
-      // Save session to database with credentials for auto re-login
-      const { error: dbError } = await supabase
+      // Check if session already exists for this user
+      const { data: existingSession } = await supabase
         .from('broker_sessions')
-        .upsert({
-          user_name: clientCode,
-          broker_name: 'angelone',
-          session_token: sessionData.jwtToken,
-          account_id: clientCode,
-          account_name: sessionData.name || clientCode,
-          exchange_list: sessionData.exchanges || [],
-          product_list: sessionData.products || [],
-          login_time: new Date().toISOString(),
-          encrypted_password: password, // Store for auto re-login
-          encrypted_totp_token: totpToken, // Store TOTP secret for re-login
-          encrypted_api_key: apiKey, // Store API key for re-login
-          last_check_time: new Date().toISOString(),
-          session_status: 'active'
-        }, {
-          onConflict: 'user_name,broker_name'
-        });
+        .select('id')
+        .eq('user_name', clientCode)
+        .eq('broker_name', 'angelone')
+        .maybeSingle();
 
-      if (dbError) {
-        console.error('Database error:', dbError);
+      if (existingSession) {
+        // Update existing session
+        console.log('Updating existing Angel One session for user:', clientCode);
+        const { error: updateError } = await supabase
+          .from('broker_sessions')
+          .update({
+            session_token: sessionData.jwtToken,
+            account_name: sessionData.name || clientCode,
+            exchange_list: sessionData.exchanges || [],
+            product_list: sessionData.products || [],
+            login_time: new Date().toISOString(),
+            encrypted_password: password,
+            encrypted_totp_token: totpToken,
+            encrypted_api_key: apiKey,
+            last_check_time: new Date().toISOString(),
+            session_status: 'active'
+          })
+          .eq('id', existingSession.id);
+
+        if (updateError) {
+          console.error('Error updating session:', updateError);
+        }
       } else {
-        console.log('Session saved to database');
+        // Insert new session
+        console.log('Creating new Angel One session for user:', clientCode);
+        const { error: insertError } = await supabase
+          .from('broker_sessions')
+          .insert({
+            user_name: clientCode,
+            broker_name: 'angelone',
+            session_token: sessionData.jwtToken,
+            account_id: clientCode,
+            account_name: sessionData.name || clientCode,
+            exchange_list: sessionData.exchanges || [],
+            product_list: sessionData.products || [],
+            login_time: new Date().toISOString(),
+            encrypted_password: password,
+            encrypted_totp_token: totpToken,
+            encrypted_api_key: apiKey,
+            last_check_time: new Date().toISOString(),
+            session_status: 'active'
+          });
+
+        if (insertError) {
+          console.error('Error inserting session:', insertError);
+        }
       }
+
+      console.log('Angel One session saved for:', clientCode);
 
       return new Response(
         JSON.stringify({ 
