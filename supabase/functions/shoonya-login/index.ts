@@ -53,8 +53,8 @@ serve(async (req) => {
     // Hash the password as required by Shoonya API
     const hashedPassword = await sha256Hash(password);
     
-    // Generate app key hash (api_key + userId)
-    const appKeyHash = await sha256Hash(apiKey + "|" + userId);
+    // Generate app key hash (userId + api_key) - correct order for NorenAPI
+    const appKeyHash = await sha256Hash(userId + "|" + apiKey);
 
     // Prepare Shoonya login request
     const payload = {
