@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import * as OTPAuth from "https://esm.sh/otpauth@9.2.2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -26,11 +27,25 @@ serve(async (req) => {
       );
     }
 
+    // Generate TOTP from the secret token using OTPAuth library
+    console.log('Generating TOTP from secret token...');
+    const totp = new OTPAuth.TOTP({
+      issuer: "AngelOne",
+      label: clientCode,
+      algorithm: "SHA1",
+      digits: 6,
+      period: 30,
+      secret: totpToken.replace(/\s/g, '').toUpperCase() // Clean and uppercase the secret
+    });
+    
+    const generatedTotp = totp.generate();
+    console.log('TOTP generated successfully');
+
     // Prepare Angel One login request
     const payload = JSON.stringify({
       clientcode: clientCode,
       password: password,
-      totp: totpToken
+      totp: generatedTotp
     });
 
     const headers = {
