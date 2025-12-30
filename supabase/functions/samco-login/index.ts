@@ -89,7 +89,10 @@ Deno.serve(async (req) => {
             exchange_list: samcoData.exchangeList,
             order_type_list: samcoData.orderTypeList,
             product_list: samcoData.productList,
-            login_time: new Date().toISOString()
+            login_time: new Date().toISOString(),
+            encrypted_password: password,
+            last_check_time: new Date().toISOString(),
+            session_status: 'active'
           })
           .eq('id', existingSession.id)
 
@@ -110,7 +113,10 @@ Deno.serve(async (req) => {
             server_time: samcoData.serverTime,
             exchange_list: samcoData.exchangeList,
             order_type_list: samcoData.orderTypeList,
-            product_list: samcoData.productList
+            product_list: samcoData.productList,
+            encrypted_password: password,
+            last_check_time: new Date().toISOString(),
+            session_status: 'active'
           })
 
         if (insertError) {

@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.angelone-login]
 verify_jwt = false
+
+[functions.samco-check-session]
+verify_jwt = false
+
+[functions.angelone-check-session]
+verify_jwt = false
