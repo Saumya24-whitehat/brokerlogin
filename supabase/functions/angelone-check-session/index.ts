@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
 
     // Check session with Angel One API - get RMS limits
     console.log('Calling Angel One getRMS API...')
-    const rmsResponse = await fetch('https://apiconnect.angelbroking.com/rest/secure/angelbroking/user/v1/getRMS', {
+    const rmsResponse = await fetch('https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/getRMS', {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
         const generatedTotp = totp.generate()
 
         // Try re-login
-        const reloginResponse = await fetch('https://apiconnect.angelbroking.com/rest/auth/angelbroking/user/v1/loginByPassword', {
+        const reloginResponse = await fetch('https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
