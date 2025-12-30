@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import samcoLogo from "@/assets/samco-logo.svg";
 import angeloneLogo from "@/assets/angelone-logo.svg";
 import shoonyaLogo from "@/assets/shoonya-logo.png";
+import upstoxLogo from "@/assets/upstox-logo.svg";
 
 interface Broker {
   id: string;
@@ -33,6 +34,12 @@ const brokers: Broker[] = [
     name: "Shoonya",
     logo: shoonyaLogo,
     description: "Connect your Shoonya/Finvasia account",
+  },
+  {
+    id: "upstox",
+    name: "Upstox",
+    logo: upstoxLogo,
+    description: "Connect your Upstox trading account",
   },
 ];
 

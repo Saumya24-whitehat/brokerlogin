@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.shoonya-check-session]
 verify_jwt = false
+
+[functions.upstox-auth]
+verify_jwt = false
+
+[functions.upstox-check-session]
+verify_jwt = false
