@@ -62,7 +62,7 @@ serve(async (req) => {
     console.log('Calling Angel One API...');
 
     // Make login request to Angel One
-    const response = await fetch('https://apiconnect.angelbroking.com/rest/auth/angelbroking/user/v1/loginByPassword', {
+    const response = await fetch('https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword', {
       method: 'POST',
       headers: headers,
       body: payload
