@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Clock, Loader2, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Clock, Loader2, AlertTriangle, User } from "lucide-react";
 
 interface BrokerCardProps {
   name: string;
@@ -10,6 +10,7 @@ interface BrokerCardProps {
   lastCheckTime?: Date | null;
   sessionActive?: boolean;
   isChecking?: boolean;
+  accountName?: string;
 }
 
 const formatLastCheck = (date: Date | null): string => {
@@ -32,7 +33,8 @@ const BrokerCard = ({
   isConnected,
   lastCheckTime,
   sessionActive = true,
-  isChecking = false
+  isChecking = false,
+  accountName
 }: BrokerCardProps) => {
   return (
     <button
@@ -102,9 +104,16 @@ const BrokerCard = ({
           )}>
             {name}
           </h3>
-          <p className="text-sm text-muted-foreground">
-            {description}
-          </p>
+          {isConnected && accountName ? (
+            <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+              <User className="w-3.5 h-3.5" />
+              <span>{accountName}</span>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {description}
+            </p>
+          )}
           
           {/* Last Check Time */}
           {isConnected && lastCheckTime && (
