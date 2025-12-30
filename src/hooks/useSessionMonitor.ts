@@ -81,16 +81,24 @@ export const useSessionMonitor = ({
 
     try {
       let functionName: string;
+      let bodyParam: Record<string, string>;
+      
       if (brokerId === 'angelone') {
         functionName = 'angelone-check-session';
+        bodyParam = { userName };
       } else if (brokerId === 'shoonya') {
         functionName = 'shoonya-check-session';
+        bodyParam = { userName };
+      } else if (brokerId === 'upstox') {
+        functionName = 'upstox-check-session';
+        bodyParam = { userId: userName };
       } else {
         functionName = 'samco-check-session';
+        bodyParam = { userName };
       }
       
       const { data, error } = await supabase.functions.invoke(functionName, {
-        body: { userName }
+        body: bodyParam
       });
 
       if (error) {
@@ -111,7 +119,9 @@ export const useSessionMonitor = ({
         }));
 
         if (data.reloggedIn || data.reLoginPerformed) {
-          const brokerDisplayName = brokerId === 'angelone' ? 'Angel One' : brokerId === 'shoonya' ? 'Shoonya' : 'Samco';
+          const brokerDisplayName = brokerId === 'angelone' ? 'Angel One' : 
+                                    brokerId === 'shoonya' ? 'Shoonya' : 
+                                    brokerId === 'upstox' ? 'Upstox' : 'Samco';
           toast.success(`${brokerDisplayName} session auto-restored!`);
           onSessionRestored?.(brokerId);
         }
@@ -128,7 +138,9 @@ export const useSessionMonitor = ({
           }
         }));
 
-        const brokerDisplayName = brokerId === 'angelone' ? 'Angel One' : brokerId === 'shoonya' ? 'Shoonya' : 'Samco';
+        const brokerDisplayName = brokerId === 'angelone' ? 'Angel One' : 
+                                  brokerId === 'shoonya' ? 'Shoonya' : 
+                                  brokerId === 'upstox' ? 'Upstox' : 'Samco';
         toast.error(`${brokerDisplayName} session expired! Please re-login.`);
         onSessionExpired?.(brokerId);
       }
