@@ -22,6 +22,7 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
   const [totpToken, setTotpToken] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [vendorCode, setVendorCode] = useState("");
+  const [imei, setImei] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -71,7 +72,7 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
       } else if (isShoonya) {
         // Call Shoonya login edge function
         const response = await supabase.functions.invoke('shoonya-login', {
-          body: { userId: loginId, password: password, totpToken: totpToken, vendorCode: vendorCode, apiKey: apiKey }
+          body: { userId: loginId, password: password, totpToken: totpToken, vendorCode: vendorCode, apiKey: apiKey, imei: imei || 'abcd1234' }
         });
         data = response.data;
         error = response.error;
@@ -115,6 +116,7 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
     setTotpToken("");
     setApiKey("");
     setVendorCode("");
+    setImei("");
     setError("");
     setShowPassword(false);
     onClose();
@@ -204,20 +206,37 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
               </div>
 
               {isShoonya && (
-                <div className="space-y-2">
-                  <Label htmlFor="vendorCode" className="text-foreground font-medium">
-                    Vendor Code
-                  </Label>
-                  <Input
-                    id="vendorCode"
-                    type="text"
-                    placeholder="Enter your Vendor Code"
-                    value={vendorCode}
-                    onChange={(e) => setVendorCode(e.target.value)}
-                    disabled={isLoading}
-                    className="h-11"
-                  />
-                </div>
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="vendorCode" className="text-foreground font-medium">
+                      Vendor Code
+                    </Label>
+                    <Input
+                      id="vendorCode"
+                      type="text"
+                      placeholder="Enter your Vendor Code"
+                      value={vendorCode}
+                      onChange={(e) => setVendorCode(e.target.value)}
+                      disabled={isLoading}
+                      className="h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="imei" className="text-foreground font-medium">
+                      IMEI Code <span className="text-muted-foreground font-normal">(Optional)</span>
+                    </Label>
+                    <Input
+                      id="imei"
+                      type="text"
+                      placeholder="Enter your IMEI Code (default: abcd1234)"
+                      value={imei}
+                      onChange={(e) => setImei(e.target.value)}
+                      disabled={isLoading}
+                      className="h-11"
+                    />
+                  </div>
+                </>
               )}
 
               <div className="space-y-2">
