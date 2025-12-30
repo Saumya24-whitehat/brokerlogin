@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Shield, TrendingUp, Zap } from "lucide-react";
 import BrokerCard from "@/components/BrokerCard";
 import LoginModal from "@/components/LoginModal";
+import { useSessionMonitor } from "@/hooks/useSessionMonitor";
 import samcoLogo from "@/assets/samco-logo.svg";
 import angeloneLogo from "@/assets/angelone-logo.svg";
 
@@ -30,16 +31,39 @@ const brokers: Broker[] = [
 const Index = () => {
   const [selectedBroker, setSelectedBroker] = useState<Broker | null>(null);
   const [connectedBrokers, setConnectedBrokers] = useState<string[]>([]);
+  const [brokerUserNames, setBrokerUserNames] = useState<Record<string, string>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSessionExpired = useCallback((brokerId: string) => {
+    // Could show a modal or notification here
+    console.log(`Session expired for ${brokerId}`);
+  }, []);
+
+  const handleSessionRestored = useCallback((brokerId: string) => {
+    console.log(`Session restored for ${brokerId}`);
+  }, []);
+
+  const { sessionStatuses, manualCheck } = useSessionMonitor({
+    connectedBrokers,
+    brokerUserNames,
+    onSessionExpired: handleSessionExpired,
+    onSessionRestored: handleSessionRestored,
+    checkIntervalMs: 60000 // 1 minute
+  });
 
   const handleBrokerClick = (broker: Broker) => {
     setSelectedBroker(broker);
     setIsModalOpen(true);
   };
 
-  const handleLoginSuccess = () => {
-    if (selectedBroker && !connectedBrokers.includes(selectedBroker.id)) {
-      setConnectedBrokers([...connectedBrokers, selectedBroker.id]);
+  const handleLoginSuccess = (userName?: string) => {
+    if (selectedBroker) {
+      if (!connectedBrokers.includes(selectedBroker.id)) {
+        setConnectedBrokers([...connectedBrokers, selectedBroker.id]);
+      }
+      if (userName) {
+        setBrokerUserNames(prev => ({ ...prev, [selectedBroker.id]: userName }));
+      }
     }
   };
 
@@ -120,6 +144,9 @@ const Index = () => {
                 description={broker.description}
                 onClick={() => handleBrokerClick(broker)}
                 isConnected={connectedBrokers.includes(broker.id)}
+                lastCheckTime={sessionStatuses[broker.id]?.lastCheckTime}
+                sessionActive={sessionStatuses[broker.id]?.sessionActive ?? true}
+                isChecking={sessionStatuses[broker.id]?.isChecking}
               />
             ))}
             

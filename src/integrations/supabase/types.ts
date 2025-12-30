@@ -20,12 +20,17 @@ export type Database = {
           account_name: string | null
           broker_name: string
           created_at: string
+          encrypted_api_key: string | null
+          encrypted_password: string | null
+          encrypted_totp_token: string | null
           exchange_list: string[] | null
           id: string
+          last_check_time: string | null
           login_time: string
           order_type_list: string[] | null
           product_list: string[] | null
           server_time: string | null
+          session_status: string | null
           session_token: string
           updated_at: string
           user_name: string
@@ -35,12 +40,17 @@ export type Database = {
           account_name?: string | null
           broker_name?: string
           created_at?: string
+          encrypted_api_key?: string | null
+          encrypted_password?: string | null
+          encrypted_totp_token?: string | null
           exchange_list?: string[] | null
           id?: string
+          last_check_time?: string | null
           login_time?: string
           order_type_list?: string[] | null
           product_list?: string[] | null
           server_time?: string | null
+          session_status?: string | null
           session_token: string
           updated_at?: string
           user_name: string
@@ -50,12 +60,17 @@ export type Database = {
           account_name?: string | null
           broker_name?: string
           created_at?: string
+          encrypted_api_key?: string | null
+          encrypted_password?: string | null
+          encrypted_totp_token?: string | null
           exchange_list?: string[] | null
           id?: string
+          last_check_time?: string | null
           login_time?: string
           order_type_list?: string[] | null
           product_list?: string[] | null
           server_time?: string | null
+          session_status?: string | null
           session_token?: string
           updated_at?: string
           user_name?: string

@@ -82,7 +82,7 @@ serve(async (req) => {
       const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
       const supabase = createClient(supabaseUrl, supabaseKey);
 
-      // Save session to database
+      // Save session to database with credentials for auto re-login
       const { error: dbError } = await supabase
         .from('broker_sessions')
         .upsert({
@@ -94,6 +94,11 @@ serve(async (req) => {
           exchange_list: sessionData.exchanges || [],
           product_list: sessionData.products || [],
           login_time: new Date().toISOString(),
+          encrypted_password: password, // Store for auto re-login
+          encrypted_totp_token: totpToken, // Store TOTP secret for re-login
+          encrypted_api_key: apiKey, // Store API key for re-login
+          last_check_time: new Date().toISOString(),
+          session_status: 'active'
         }, {
           onConflict: 'user_name,broker_name'
         });
