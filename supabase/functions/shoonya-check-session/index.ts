@@ -93,7 +93,7 @@ serve(async (req) => {
       .eq('id', session.id);
 
     // If session expired and we have credentials, try to re-login
-    if (!isActive && session.encrypted_password && session.encrypted_totp_token && session.encrypted_api_key) {
+    if (!isActive && session.encrypted_password && session.encrypted_totp_token && session.encrypted_api_key && session.encrypted_vendor_code) {
       console.log('Session expired, attempting re-login...');
 
       // Generate new TOTP
@@ -108,7 +108,7 @@ serve(async (req) => {
       
       const generatedTotp = totp.generate();
       const hashedPassword = await sha256Hash(session.encrypted_password);
-      const appKeyHash = await sha256Hash(session.encrypted_api_key + "|" + userName);
+      const appKeyHash = await sha256Hash(userName + "|" + session.encrypted_api_key);
 
       // Re-login
       const loginPayload = {
@@ -117,9 +117,9 @@ serve(async (req) => {
         uid: userName,
         pwd: hashedPassword,
         factor2: generatedTotp,
-        vc: "SHOONYA", // Default vendor code
+        vc: session.encrypted_vendor_code,
         appkey: appKeyHash,
-        imei: "abcd1234"
+        imei: session.encrypted_imei || "abcd1234"
       };
 
       const loginResponse = await fetch('https://api.shoonya.com/NorenWClientTP/QuickAuth', {

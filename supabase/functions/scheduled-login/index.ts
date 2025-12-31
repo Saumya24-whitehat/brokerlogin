@@ -22,10 +22,10 @@ async function loginShoonya(supabase: any, session: any): Promise<boolean> {
     const password = session.encrypted_password;
     const totpSecret = session.encrypted_totp_token;
     const apiKey = session.encrypted_api_key;
-    const vendorCode = session.account_name?.split('|')[0] || '';
-    const imei = session.account_name?.split('|')[1] || 'abc1234';
+    const vendorCode = session.encrypted_vendor_code;
+    const imei = session.encrypted_imei || 'abcd1234';
 
-    if (!password || !totpSecret || !apiKey) {
+    if (!password || !totpSecret || !apiKey || !vendorCode) {
       console.log(`Shoonya: Missing credentials for ${userId}`);
       return false;
     }
@@ -37,7 +37,7 @@ async function loginShoonya(supabase: any, session: any): Promise<boolean> {
       algorithm: 'SHA1',
       digits: 6,
       period: 30,
-      secret: OTPAuth.Secret.fromBase32(totpSecret.replace(/\s/g, '').toUpperCase()),
+      secret: totpSecret.replace(/\s/g, '').toUpperCase(),
     });
     const totpCode = totp.generate();
 
@@ -45,27 +45,34 @@ async function loginShoonya(supabase: any, session: any): Promise<boolean> {
     const hashedPassword = await sha256Hash(password);
     const appKeyHash = await sha256Hash(`${userId}|${apiKey}`);
 
-    const loginPayload = `jData=${JSON.stringify({
+    const loginPayload = {
       source: 'API',
-      apkversion: 'js:1.0.0',
+      apkversion: '1.0.0',
       uid: userId,
       pwd: hashedPassword,
       factor2: totpCode,
       vc: vendorCode,
       appkey: appKeyHash,
       imei: imei,
-    })}`;
+    };
 
     const response = await fetch('https://api.shoonya.com/NorenWClientTP/QuickAuth', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: loginPayload,
+      headers: { 'Content-Type': 'application/json' },
+      body: "jData=" + JSON.stringify(loginPayload),
     });
 
-    const data = await response.json();
+    const responseText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      console.error(`Shoonya: Failed to parse response for ${userId}`);
+      return false;
+    }
     console.log(`Shoonya login for ${userId}:`, data.stat);
 
-    if (data.stat === 'Ok') {
+    if (data.stat === 'Ok' && data.susertoken) {
       await supabase
         .from('broker_sessions')
         .update({
@@ -77,6 +84,7 @@ async function loginShoonya(supabase: any, session: any): Promise<boolean> {
         .eq('id', session.id);
       return true;
     }
+    console.log(`Shoonya login failed for ${userId}:`, data.emsg);
     return false;
   } catch (e) {
     console.error(`Shoonya login error for ${session.user_name}:`, e);

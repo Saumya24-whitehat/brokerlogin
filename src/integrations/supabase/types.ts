@@ -21,8 +21,10 @@ export type Database = {
           broker_name: string
           created_at: string
           encrypted_api_key: string | null
+          encrypted_imei: string | null
           encrypted_password: string | null
           encrypted_totp_token: string | null
+          encrypted_vendor_code: string | null
           exchange_list: string[] | null
           id: string
           last_check_time: string | null
@@ -41,8 +43,10 @@ export type Database = {
           broker_name?: string
           created_at?: string
           encrypted_api_key?: string | null
+          encrypted_imei?: string | null
           encrypted_password?: string | null
           encrypted_totp_token?: string | null
+          encrypted_vendor_code?: string | null
           exchange_list?: string[] | null
           id?: string
           last_check_time?: string | null
@@ -61,8 +65,10 @@ export type Database = {
           broker_name?: string
           created_at?: string
           encrypted_api_key?: string | null
+          encrypted_imei?: string | null
           encrypted_password?: string | null
           encrypted_totp_token?: string | null
+          encrypted_vendor_code?: string | null
           exchange_list?: string[] | null
           id?: string
           last_check_time?: string | null
