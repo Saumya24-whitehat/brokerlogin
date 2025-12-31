@@ -110,10 +110,16 @@ const Index = () => {
 
   const handleSessionExpired = useCallback((brokerId: string) => {
     console.log(`Session expired for ${brokerId}`);
+    // Keep "logged_out" as-is (intentional 5 PM logout), otherwise mark expired
+    setBrokerSessionStatus(prev => {
+      if (prev[brokerId] === 'logged_out') return prev;
+      return { ...prev, [brokerId]: 'expired' };
+    });
   }, []);
 
   const handleSessionRestored = useCallback((brokerId: string) => {
     console.log(`Session restored for ${brokerId}`);
+    setBrokerSessionStatus(prev => ({ ...prev, [brokerId]: 'active' }));
   }, []);
 
   const { sessionStatuses, manualCheck } = useSessionMonitor({
@@ -123,6 +129,32 @@ const Index = () => {
     onSessionRestored: handleSessionRestored,
     checkIntervalMs: 60000 // 1 minute
   });
+
+  // Sync UI state with live monitor results (so cards update after auto re-login)
+  useEffect(() => {
+    const entries = Object.entries(sessionStatuses);
+    if (entries.length === 0) return;
+
+    setBrokerLastCheckTime(prev => {
+      const next = { ...prev };
+      for (const [brokerId, status] of entries) {
+        if (status?.lastCheckTime) next[brokerId] = status.lastCheckTime;
+      }
+      return next;
+    });
+
+    setBrokerSessionStatus(prev => {
+      const next = { ...prev };
+      for (const [brokerId, status] of entries) {
+        // Don't override explicit scheduled logout state
+        if (next[brokerId] === 'logged_out') continue;
+        if (typeof status?.sessionActive === 'boolean') {
+          next[brokerId] = status.sessionActive ? 'active' : 'expired';
+        }
+      }
+      return next;
+    });
+  }, [sessionStatuses]);
 
   const handleBrokerClick = (broker: Broker) => {
     setSelectedBroker(broker);
