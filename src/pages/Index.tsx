@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Shield, TrendingUp, Zap } from "lucide-react";
 import BrokerCard from "@/components/BrokerCard";
+import ConsentModal from "@/components/ConsentModal";
 import LoginModal from "@/components/LoginModal";
 import { useSessionMonitor } from "@/hooks/useSessionMonitor";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,7 +49,8 @@ const Index = () => {
   const [connectedBrokers, setConnectedBrokers] = useState<string[]>([]);
   const [brokerUserNames, setBrokerUserNames] = useState<Record<string, string>>({});
   const [brokerAccountNames, setBrokerAccountNames] = useState<Record<string, string>>({});
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
 
   // Load existing sessions from database on mount
@@ -114,7 +116,17 @@ const Index = () => {
 
   const handleBrokerClick = (broker: Broker) => {
     setSelectedBroker(broker);
-    setIsModalOpen(true);
+    // If already connected, open login modal directly; otherwise show consent first
+    if (connectedBrokers.includes(broker.id)) {
+      setIsLoginModalOpen(true);
+    } else {
+      setIsConsentModalOpen(true);
+    }
+  };
+
+  const handleConsentAccept = () => {
+    setIsConsentModalOpen(false);
+    setIsLoginModalOpen(true);
   };
 
   const handleLoginSuccess = (userName?: string, accountName?: string) => {
@@ -266,11 +278,21 @@ const Index = () => {
         </footer>
       </div>
 
+      {/* Consent Modal */}
+      {selectedBroker && (
+        <ConsentModal
+          isOpen={isConsentModalOpen}
+          onClose={() => setIsConsentModalOpen(false)}
+          onAccept={handleConsentAccept}
+          brokerName={selectedBroker.name}
+        />
+      )}
+
       {/* Login Modal */}
       {selectedBroker && (
         <LoginModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          isOpen={isLoginModalOpen}
+          onClose={() => setIsLoginModalOpen(false)}
           brokerId={selectedBroker.id}
           brokerName={selectedBroker.name}
           brokerLogo={selectedBroker.logo}
