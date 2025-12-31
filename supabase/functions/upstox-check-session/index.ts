@@ -24,23 +24,22 @@ serve(async (req) => {
 
     console.log(`Checking Upstox session for user: ${userId}`);
 
-    // Get session from database
+    // Get session from database - check both active and expired sessions
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { data: session, error: fetchError } = await supabase
       .from('broker_sessions')
-      .select('session_token, account_name')
+      .select('*')
       .eq('user_name', userId)
       .eq('broker_name', 'upstox')
-      .eq('session_status', 'active')
-      .single();
+      .maybeSingle();
 
     if (fetchError || !session) {
-      console.log('No active session found for user:', userId);
+      console.log('No session found for user:', userId);
       return new Response(
-        JSON.stringify({ success: false, sessionActive: false, error: 'No active session found' }),
+        JSON.stringify({ success: false, sessionActive: false, error: 'No session found' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -73,18 +72,26 @@ serve(async (req) => {
         .eq('user_name', userId)
         .eq('broker_name', 'upstox');
 
+      // Upstox OAuth doesn't support auto re-login - user must manually authorize again
       return new Response(
-        JSON.stringify({ success: true, sessionActive: false, accountName: session.account_name }),
+        JSON.stringify({ 
+          success: true, 
+          sessionActive: false, 
+          accountName: session.account_name,
+          requiresManualLogin: true,
+          message: 'Upstox session expired. Please login again manually (OAuth required).'
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     console.log('Session is still active');
 
-    // Update last check time
+    // Update last check time and ensure status is active
     await supabase
       .from('broker_sessions')
       .update({ 
+        session_status: 'active',
         last_check_time: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -95,6 +102,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         sessionActive: true,
+        lastCheckTime: new Date().toISOString(),
         accountName: session.account_name,
         userName: profileData.data?.user_name
       }),
