@@ -260,6 +260,83 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Referral Section */}
+        <section className="mt-12 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+          <div className="p-6 rounded-xl bg-card border border-border">
+            <h2 className="text-lg font-semibold text-foreground mb-2">
+              Don't have an account?
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              Open a FREE trading & investment account using the links below
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Angel One Referral */}
+              <a 
+                href="https://angel-one.onelink.me/Wjgr/6ax05pq7" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex flex-col p-4 rounded-lg bg-secondary/50 border border-border hover:border-primary/50 hover:bg-secondary transition-all group"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <img src={angeloneLogo} alt="Angel One" className="w-8 h-8 object-contain" />
+                  <span className="font-medium text-foreground">Angel One</span>
+                </div>
+                <ul className="text-xs text-muted-foreground space-y-1 mb-3">
+                  <li>✅ All trades @ ₹20</li>
+                  <li>✅ Quick SIP in Direct MF</li>
+                  <li>✅ 1 Lac MTF @ 0% interest</li>
+                </ul>
+                <span className="text-xs text-primary font-medium group-hover:underline">
+                  Open Free Account →
+                </span>
+              </a>
+
+              {/* Upstox Referral */}
+              <a 
+                href="https://upstox.onelink.me/0H1s/7HAPQC" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex flex-col p-4 rounded-lg bg-secondary/50 border border-border hover:border-primary/50 hover:bg-secondary transition-all group"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <img src={upstoxLogo} alt="Upstox" className="w-8 h-8 object-contain" />
+                  <span className="font-medium text-foreground">Upstox</span>
+                </div>
+                <ul className="text-xs text-muted-foreground space-y-1 mb-3">
+                  <li>✅ Stock like you shop</li>
+                  <li>✅ Buy Top Funds & Insurance</li>
+                  <li>✅ Pro Mode for F&O trading</li>
+                </ul>
+                <span className="text-xs text-primary font-medium group-hover:underline">
+                  Open Free Account →
+                </span>
+              </a>
+
+              {/* Samco Referral */}
+              <a 
+                href="https://www.samco.in/R/2-madhusudanap-1" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex flex-col p-4 rounded-lg bg-secondary/50 border border-border hover:border-primary/50 hover:bg-secondary transition-all group"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <img src={samcoLogo} alt="Samco" className="w-8 h-8 object-contain" />
+                  <span className="font-medium text-foreground">Samco</span>
+                </div>
+                <ul className="text-xs text-muted-foreground space-y-1 mb-3">
+                  <li>✅ Free Demat Account</li>
+                  <li>✅ ₹0 AMC for 1st year</li>
+                  <li>✅ Know unseen trade truths</li>
+                </ul>
+                <span className="text-xs text-primary font-medium group-hover:underline">
+                  Open Free Account →
+                </span>
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* Connected Status */}
         {connectedBrokers.length > 0 && (
           <div className="mt-12 p-6 rounded-xl bg-primary/5 border border-primary/20 animate-fade-in">
