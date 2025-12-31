@@ -26,3 +26,21 @@ verify_jwt = false
 
 [functions.get-sessions]
 verify_jwt = false
+
+[functions.shoonya-logout]
+verify_jwt = false
+
+[functions.samco-logout]
+verify_jwt = false
+
+[functions.angelone-logout]
+verify_jwt = false
+
+[functions.upstox-logout]
+verify_jwt = false
+
+[functions.scheduled-logout]
+verify_jwt = false
+
+[functions.scheduled-login]
+verify_jwt = false
