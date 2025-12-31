@@ -123,8 +123,9 @@ serve(async (req) => {
 
     for (const session of sessions || []) {
       let logoutSuccess = false;
+      const brokerName = session.broker_name; // Use broker_name from DB
 
-      switch (session.broker) {
+      switch (brokerName) {
         case 'shoonya':
           logoutSuccess = await logoutShoonya(supabase, session);
           break;
@@ -149,7 +150,7 @@ serve(async (req) => {
         .eq('id', session.id);
 
       results.push({
-        broker: session.broker,
+        broker: brokerName,
         userName: session.user_name,
         logoutSuccess,
       });
