@@ -49,6 +49,8 @@ const Index = () => {
   const [connectedBrokers, setConnectedBrokers] = useState<string[]>([]);
   const [brokerUserNames, setBrokerUserNames] = useState<Record<string, string>>({});
   const [brokerAccountNames, setBrokerAccountNames] = useState<Record<string, string>>({});
+  const [brokerSessionStatus, setBrokerSessionStatus] = useState<Record<string, 'active' | 'logged_out' | 'expired'>>({});
+  const [brokerLastCheckTime, setBrokerLastCheckTime] = useState<Record<string, Date>>({});
   const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
@@ -57,10 +59,10 @@ const Index = () => {
   useEffect(() => {
     const loadExistingSessions = async () => {
       try {
+        // Load ALL sessions (not just active ones)
         const { data: sessions, error } = await supabase
           .from('broker_sessions')
-          .select('user_name, broker_name, account_name, session_status')
-          .eq('session_status', 'active');
+          .select('user_name, broker_name, account_name, session_status, last_check_time');
 
         if (error) {
           console.error('Error loading sessions:', error);
@@ -72,6 +74,8 @@ const Index = () => {
           const connected: string[] = [];
           const userNames: Record<string, string> = {};
           const accountNames: Record<string, string> = {};
+          const sessionStatuses: Record<string, 'active' | 'logged_out' | 'expired'> = {};
+          const lastCheckTimes: Record<string, Date> = {};
 
           sessions.forEach((session) => {
             // Map broker_name from DB to our broker IDs
@@ -81,12 +85,18 @@ const Index = () => {
             if (session.account_name) {
               accountNames[brokerId] = session.account_name;
             }
+            sessionStatuses[brokerId] = session.session_status as 'active' | 'logged_out' | 'expired';
+            if (session.last_check_time) {
+              lastCheckTimes[brokerId] = new Date(session.last_check_time);
+            }
           });
 
           setConnectedBrokers(connected);
           setBrokerUserNames(userNames);
           setBrokerAccountNames(accountNames);
-          console.log('Loaded existing sessions:', connected);
+          setBrokerSessionStatus(sessionStatuses);
+          setBrokerLastCheckTime(lastCheckTimes);
+          console.log('Loaded existing sessions:', connected, sessionStatuses);
         }
       } catch (error) {
         console.error('Error loading sessions:', error);
@@ -220,10 +230,11 @@ const Index = () => {
                 description={broker.description}
                 onClick={() => handleBrokerClick(broker)}
                 isConnected={connectedBrokers.includes(broker.id)}
-                lastCheckTime={sessionStatuses[broker.id]?.lastCheckTime}
-                sessionActive={sessionStatuses[broker.id]?.sessionActive ?? true}
+                lastCheckTime={sessionStatuses[broker.id]?.lastCheckTime || brokerLastCheckTime[broker.id]}
+                sessionActive={brokerSessionStatus[broker.id] === 'active'}
                 isChecking={sessionStatuses[broker.id]?.isChecking}
                 accountName={brokerAccountNames[broker.id]}
+                sessionStatus={brokerSessionStatus[broker.id]}
               />
             ))}
             

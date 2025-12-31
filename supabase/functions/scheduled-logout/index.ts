@@ -140,12 +140,13 @@ serve(async (req) => {
           break;
       }
 
-      // Update session status in database
+      // Update session status in database with logout time
       await supabase
         .from('broker_sessions')
         .update({ 
           session_status: 'logged_out',
-          session_token: null
+          session_token: null,
+          last_check_time: new Date().toISOString()
         })
         .eq('id', session.id);
 
