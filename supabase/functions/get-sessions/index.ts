@@ -17,10 +17,11 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Fetch all broker sessions
+    // Fetch only active broker sessions
     const { data, error } = await supabase
       .from('broker_sessions')
       .select('*')
+      .eq('session_status', 'active')
       .order('created_at', { ascending: false });
 
     if (error) {
