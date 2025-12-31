@@ -213,11 +213,12 @@ serve(async (req) => {
 
     for (const session of sessions || []) {
       let loginSuccess = false;
+      const brokerName = session.broker_name; // Use broker_name from DB
 
       // Skip Upstox as it requires OAuth
-      if (session.broker === 'upstox') {
+      if (brokerName === 'upstox') {
         results.push({
-          broker: session.broker,
+          broker: brokerName,
           userName: session.user_name,
           loginSuccess: false,
           reason: 'Upstox requires manual OAuth login',
@@ -225,7 +226,7 @@ serve(async (req) => {
         continue;
       }
 
-      switch (session.broker) {
+      switch (brokerName) {
         case 'shoonya':
           loginSuccess = await loginShoonya(supabase, session);
           break;
@@ -238,7 +239,7 @@ serve(async (req) => {
       }
 
       results.push({
-        broker: session.broker,
+        broker: brokerName,
         userName: session.user_name,
         loginSuccess,
       });
