@@ -122,6 +122,8 @@ serve(async (req) => {
         encrypted_password: password,
         encrypted_totp_token: totpToken,
         encrypted_api_key: apiKey,
+        encrypted_vendor_code: vendorCode,
+        encrypted_imei: imei || "abcd1234",
         last_check_time: new Date().toISOString(),
         session_status: 'active',
         server_time: data.request_time || null
