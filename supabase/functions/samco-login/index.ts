@@ -105,6 +105,7 @@ Deno.serve(async (req) => {
             product_list: samcoData.productList,
             login_time: new Date().toISOString(),
             encrypted_password: password,
+            encrypted_api_key: accessToken,
             last_check_time: new Date().toISOString(),
             session_status: 'active'
           })
@@ -129,6 +130,7 @@ Deno.serve(async (req) => {
             order_type_list: samcoData.orderTypeList,
             product_list: samcoData.productList,
             encrypted_password: password,
+            encrypted_api_key: accessToken,
             last_check_time: new Date().toISOString(),
             session_status: 'active'
           })
