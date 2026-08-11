@@ -112,7 +112,7 @@ export const useSessionMonitor = ({
   const [isMarketHours, setIsMarketHours] = useState(isWithinMarketHours());
   const logoutPerformedToday = useRef(false);
   const loginPerformedToday = useRef(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const checkSession = useCallback(async (brokerId: string) => {
     const userName = brokerUserNames[brokerId];

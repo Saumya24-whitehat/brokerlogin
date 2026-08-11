@@ -8,6 +8,7 @@ const corsHeaders = {
 interface SamcoLoginRequest {
   userId: string
   password: string
+  accessToken?: string
 }
 
 interface SamcoLoginResponse {
