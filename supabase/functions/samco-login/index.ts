@@ -30,7 +30,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { userId, password, accessToken }: SamcoLoginRequest = await req.json()
+    const body: SamcoLoginRequest = await req.json()
+    const userId = body.userId?.trim()
+    const password = body.password?.trim()
+    const accessToken = body.accessToken?.trim()
     
     console.log(`Attempting login for user: ${userId}`)
 
