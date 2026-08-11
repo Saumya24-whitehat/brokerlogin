@@ -159,13 +159,17 @@ Deno.serve(async (req) => {
       )
     } else {
       console.error('Samco login failed:', samcoData.statusMessage)
+      const message = samcoData.statusMessage || 'Login failed. Please check your credentials.'
+      const isTokenIssue = /access token/i.test(message)
       return new Response(
         JSON.stringify({
           success: false,
-          error: samcoData.statusMessage || 'Login failed. Please check your credentials.'
+          error: isTokenIssue
+            ? `${message} Make sure the API Key belongs to this Samco user ID and is active in the Samco developer portal.`
+            : message
         }),
         { 
-          status: 401, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
