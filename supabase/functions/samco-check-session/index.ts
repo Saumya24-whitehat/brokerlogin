@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
       // Session expired - try to re-login if we have credentials
       console.log('Session expired, attempting re-login...')
       
-      if (session.encrypted_password) {
+      if (session.encrypted_password && session.encrypted_api_key) {
         // Try re-login
         const reloginResponse = await fetch('https://tradeapi.samco.in/login', {
           method: 'POST',
@@ -93,7 +93,8 @@ Deno.serve(async (req) => {
           },
           body: JSON.stringify({ 
             userId: session.user_name, 
-            password: session.encrypted_password 
+            password: session.encrypted_password,
+            accessToken: session.encrypted_api_key
           })
         })
 

@@ -96,16 +96,17 @@ async function loginSamco(supabase: any, session: any): Promise<boolean> {
   try {
     const userId = session.user_name;
     const password = session.encrypted_password;
+    const accessToken = session.encrypted_api_key;
 
-    if (!password) {
-      console.log(`Samco: Missing password for ${userId}`);
+    if (!password || !accessToken) {
+      console.log(`Samco: Missing password or API key for ${userId}`);
       return false;
     }
 
     const response = await fetch('https://tradeapi.samco.in/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ userId, password, yob: '' }),
+      body: JSON.stringify({ userId, password, accessToken }),
     });
 
     const data = await response.json();
