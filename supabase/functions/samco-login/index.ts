@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { userId, password }: SamcoLoginRequest = await req.json()
+    const { userId, password, accessToken }: SamcoLoginRequest = await req.json()
     
     console.log(`Attempting login for user: ${userId}`)
 
@@ -49,6 +49,19 @@ Deno.serve(async (req) => {
       )
     }
 
+    if (!accessToken) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Samco API Key (Access Token) is required. Get it from the Samco developer portal.' 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
     // Call Samco API
     console.log('Calling Samco login API...')
     const samcoResponse = await fetch('https://tradeapi.samco.in/login', {
@@ -57,7 +70,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({ userId, password })
+      body: JSON.stringify({ userId, password, accessToken })
     })
 
     const samcoData: SamcoLoginResponse = await samcoResponse.json()
