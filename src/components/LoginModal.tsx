@@ -33,6 +33,7 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
   const isAngelOne = brokerId === "angelone";
   const isShoonya = brokerId === "shoonya";
   const isUpstox = brokerId === "upstox";
+  const isSamco = brokerId === "samco";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,8 +168,8 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
       setError("Please enter your TOTP Token");
       return;
     }
-    if ((isAngelOne || isShoonya) && !apiKey.trim()) {
-      setError("Please enter your API Key");
+    if ((isAngelOne || isShoonya || isSamco) && !apiKey.trim()) {
+      setError(isSamco ? "Please enter your Samco API Key (Access Token)" : "Please enter your API Key");
       return;
     }
     if (isShoonya && !vendorCode.trim()) {
@@ -198,7 +199,7 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
       } else {
         // Call Samco login edge function
         const response = await supabase.functions.invoke('samco-login', {
-          body: { userId: loginId, password: password }
+          body: { userId: loginId, password: password, accessToken: apiKey }
         });
         data = response.data;
         error = response.error;
@@ -369,6 +370,26 @@ const LoginModal = ({ isOpen, onClose, brokerId, brokerName, brokerLogo, onLogin
                   </button>
                 </div>
               </div>
+
+              {isSamco && (
+                <div className="space-y-2">
+                  <Label htmlFor="samcoApiKey" className="text-foreground font-medium">
+                    API Key (Access Token)
+                  </Label>
+                  <Input
+                    id="samcoApiKey"
+                    type="text"
+                    placeholder="Enter your Samco API Key"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    disabled={isLoading}
+                    className="h-11"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Samco now requires an API access token from the Samco developer portal.
+                  </p>
+                </div>
+              )}
 
               {(isAngelOne || isShoonya) && (
                 <>
